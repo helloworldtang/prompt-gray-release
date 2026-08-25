@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.venv/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Runtime artifacts
+output/
+postmortems/
+baseline.json
+
+# Environment
+.env
+.DS_Store
+
+# Local editor/agent config
+.claude/

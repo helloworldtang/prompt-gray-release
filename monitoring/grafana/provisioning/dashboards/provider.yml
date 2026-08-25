@@ -1,0 +1,8 @@
+apiVersion: 1
+
+providers:
+  - name: prompt-gray-release
+    folder: Prompt Gray Release
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards

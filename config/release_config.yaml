@@ -1,0 +1,54 @@
+# Gray release thresholds and rollout plan.
+# Every number here is enforced in code; see gray_release/evaluation/gates.py
+# and gray_release/release/canary.py.
+
+evaluation:
+  # A single case scores below this line counts as a failure.
+  fail_threshold: 0.7
+  gates:
+    # Layer 1: offline eval gates. A prompt change must pass all of them
+    # before it is allowed to touch production traffic.
+    # Regression set: average score must not drop more than 3% vs baseline.
+    regression_max_avg_drop: 0.03
+    # Edge set: cases scoring below fail_threshold must stay under 5%.
+    edge_max_fail_rate: 0.05
+    # New-feature set: the change must actually deliver, average >= 0.70.
+    new_feature_min_avg: 0.70
+  dataset_refresh:
+    # Refresh cadence from production logs: keep 80% old cases, add 20% new.
+    keep_ratio: 0.8
+    refresh_interval_days: 7
+
+ab_test:
+  # Layer 2: 1% traffic split into A (new prompt, 0.5%) and B (old prompt, 0.5%).
+  a_permille: 5
+  b_permille: 5
+  # A/B passes only when the new prompt beats the old one by >= 5% on both
+  # satisfaction and task completion, with response time not degrading > 10%.
+  min_improvement: 0.05
+  max_response_time_degradation: 0.10
+  # Minimum observation window; production uses 24h to cover day/night,
+  # weekday/weekend patterns. Demo compresses this.
+  min_observation_seconds: 86400
+  # Below this many dialogues per group the verdict is "not passed" --
+  # a handful of samples carries no statistical meaning.
+  min_sample: 30
+
+rollout:
+  # Layer 3: progressive ramp-up. Never skip a step (lesson from pit #3).
+  steps: [5, 20, 50, 100]
+  # Production observes 4h per step; demo compresses this.
+  observe_seconds: 14400
+
+circuit_breaker:
+  # Any condition below trips the breaker: rollback to last stable version
+  # and pause rollout for the cooldown period.
+  satisfaction_ratio: 0.95 # new/old < 0.95 over the window
+  completion_ratio: 0.95
+  response_time_ratio: 1.5 # new/old > 1.5 over the window
+  max_error_rate: 0.05
+  # Window used for breaker evaluation.
+  window_seconds: 3600
+  # Skip breaker evaluation when the new version has too few samples.
+  min_sample: 20
+  cooldown_seconds: 86400

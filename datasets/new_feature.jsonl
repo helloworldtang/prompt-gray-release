@@ -1,0 +1,6 @@
+{"id": "nf-001", "input": "下单有赠品吗？", "expected": {"must_contain": ["线缆", "套装", "赠送"], "must_not_contain": ["无法回答"], "keywords": ["免费", "下单"]}}
+{"id": "nf-002", "input": "听说有线缆套装，送什么？", "expected": {"must_contain": ["线缆", "套装", "赠送"], "must_not_contain": ["无法回答"], "keywords": ["免费", "下单"]}}
+{"id": "nf-003", "input": "现在加赠什么东西", "expected": {"must_contain": ["线缆", "套装", "赠送"], "must_not_contain": ["无法回答"], "keywords": ["免费", "下单"]}}
+{"id": "nf-004", "input": "赠品是什么", "expected": {"must_contain": ["线缆", "套装", "赠送"], "must_not_contain": ["无法回答"], "keywords": ["免费", "下单"]}}
+{"id": "nf-005", "input": "送什么", "expected": {"must_contain": ["线缆", "套装", "赠送"], "must_not_contain": ["无法回答"], "keywords": ["免费", "下单"]}}
+{"id": "nf-006", "input": "线缆管理套装怎么拿到", "expected": {"must_contain": ["线缆", "套装", "赠送"], "must_not_contain": ["无法回答"], "keywords": ["免费", "下单"]}}

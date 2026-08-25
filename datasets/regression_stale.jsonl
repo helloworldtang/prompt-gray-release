@@ -1,0 +1,10 @@
+{"id": "stale-001", "input": "这桌子多少钱？", "expected": {"must_contain": ["元", "2999", "优惠", "会员"], "must_not_contain": ["无法回答", "不知道"], "keywords": ["30天", "退货", "免费"]}}
+{"id": "stale-002", "input": "价格是多少", "expected": {"must_contain": ["元", "2999", "优惠", "会员"], "must_not_contain": ["无法回答", "不知道"], "keywords": ["30天", "退货", "免费"]}}
+{"id": "stale-003", "input": "怎么卖的", "expected": {"must_contain": ["元", "2999", "优惠", "会员"], "must_not_contain": ["无法回答", "不知道"], "keywords": ["30天", "退货", "免费"]}}
+{"id": "stale-004", "input": "现在售价多少", "expected": {"must_contain": ["元", "2999", "优惠", "会员"], "must_not_contain": ["无法回答", "不知道"], "keywords": ["30天", "退货", "免费"]}}
+{"id": "stale-005", "input": "这桌子多少钱，价格能再说说吗", "expected": {"must_contain": ["元", "2999", "优惠", "会员"], "must_not_contain": ["无法回答", "不知道"], "keywords": ["30天", "退货", "免费"]}}
+{"id": "stale-006", "input": "这桌子有什么功能？", "expected": {"must_contain": ["升降", "记忆", "安全", "赠送"], "must_not_contain": ["无法回答"], "keywords": ["电动", "新增", "免费"]}}
+{"id": "stale-007", "input": "跟普通桌子比强在哪", "expected": {"must_contain": ["升降", "记忆", "安全", "赠送"], "must_not_contain": ["无法回答"], "keywords": ["电动", "新增", "免费"]}}
+{"id": "stale-008", "input": "安全方面怎么样", "expected": {"must_contain": ["升降", "记忆", "安全", "赠送"], "must_not_contain": ["无法回答"], "keywords": ["电动", "新增", "免费"]}}
+{"id": "stale-009", "input": "支持退货吗？", "expected": {"must_contain": ["30天", "退货"], "must_not_contain": ["无法回答"], "keywords": ["无理由", "运费"]}}
+{"id": "stale-010", "input": "保修政策是什么", "expected": {"must_contain": ["30天", "退货"], "must_not_contain": ["无法回答"], "keywords": ["无理由", "运费"]}}

@@ -1,0 +1,82 @@
+# Breaker conditions expressed as Prometheus alerts -- the on-call sees the
+# same four trip conditions the in-process circuit breaker enforces.
+groups:
+  - name: prompt-gray-release
+    rules:
+      - alert: PromptSatisfactionDrop
+        expr: |
+          (
+            sum(bot_satisfaction_sum{version="new"})
+            / sum(bot_satisfaction_count{version="new"})
+          )
+          /
+          (
+            sum(bot_satisfaction_sum{version="stable"})
+            / sum(bot_satisfaction_count{version="stable"})
+          ) < 0.95
+        for: 5m
+        labels:
+          severity: critical
+          action: rollback
+        annotations:
+          summary: "New prompt satisfaction dropped >5% vs stable"
+          description: "Breaker condition satisfaction_drop; roll back with scripts/rollback.sh."
+
+      - alert: PromptCompletionDrop
+        expr: |
+          (
+            sum(bot_task_completed_total{version="new"})
+            / sum(bot_requests_total{version="new"})
+          )
+          /
+          (
+            sum(bot_task_completed_total{version="stable"})
+            / sum(bot_requests_total{version="stable"})
+          ) < 0.95
+        for: 5m
+        labels:
+          severity: critical
+          action: rollback
+        annotations:
+          summary: "New prompt task completion dropped >5% vs stable"
+          description: "Breaker condition completion_drop; roll back with scripts/rollback.sh."
+
+      - alert: PromptResponseTimeSpike
+        expr: |
+          (
+            sum(rate(bot_response_seconds_sum{version="new"}[10m]))
+            / sum(rate(bot_response_seconds_count{version="new"}[10m]))
+          )
+          /
+          (
+            sum(rate(bot_response_seconds_sum{version="stable"}[10m]))
+            / sum(rate(bot_response_seconds_count{version="stable"}[10m]))
+          ) > 1.5
+        for: 10m
+        labels:
+          severity: warning
+          action: rollback
+        annotations:
+          summary: "New prompt response time spiked >50% vs stable"
+          description: "Breaker condition response_time_spike."
+
+      - alert: PromptErrorRateHigh
+        expr: |
+          sum(rate(bot_errors_total{version="new"}[5m]))
+          / sum(rate(bot_requests_total{version="new"}[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          action: rollback
+        annotations:
+          summary: "New prompt error rate above 5%"
+          description: "Breaker condition error_rate; roll back immediately."
+
+      - alert: PromptNoTrafficSplit
+        expr: sum(bot_satisfaction_count{version="stable"}) < 10
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No control traffic during a rollout"
+          description: "Without stable-version traffic the breaker has no baseline; check the traffic plan."

@@ -1,0 +1,22 @@
+# Alertmanager routing: critical prompt regressions page immediately,
+# warnings batch to the team channel. Webhook URL comes from the
+# environment in real deployments (docker-compose passes a placeholder).
+route:
+  receiver: team-chat
+  group_by: [alertname]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  routes:
+    - matchers:
+        - severity="critical"
+      receiver: oncall
+      repeat_interval: 1h
+
+receivers:
+  - name: team-chat
+    webhook_configs:
+      - url: http://gateway:8080/health # placeholder; point at Slack/DingTalk webhook
+  - name: oncall
+    webhook_configs:
+      - url: http://gateway:8080/health # placeholder; point at the pager service

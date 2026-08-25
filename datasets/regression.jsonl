@@ -1,0 +1,10 @@
+{"id": "reg-001", "input": "这桌子多少钱？", "expected": {"must_contain": ["元", "2999", "优惠", "会员"], "must_not_contain": ["无法回答", "不知道"], "keywords": ["30天", "退货", "免费"]}}
+{"id": "reg-002", "input": "价格是多少", "expected": {"must_contain": ["元", "2999", "优惠", "会员"], "must_not_contain": ["无法回答", "不知道"], "keywords": ["30天", "退货", "免费"]}}
+{"id": "reg-003", "input": "怎么卖的", "expected": {"must_contain": ["元", "2999", "优惠", "会员"], "must_not_contain": ["无法回答", "不知道"], "keywords": ["30天", "退货", "免费"]}}
+{"id": "reg-004", "input": "现在售价多少", "expected": {"must_contain": ["元", "2999", "优惠", "会员"], "must_not_contain": ["无法回答", "不知道"], "keywords": ["30天", "退货", "免费"]}}
+{"id": "reg-005", "input": "贵不贵？", "expected": {"must_contain": ["元", "2999", "优惠", "会员"], "must_not_contain": ["无法回答", "不知道"], "keywords": ["30天", "退货", "免费"]}}
+{"id": "reg-006", "input": "有什么优惠", "expected": {"must_contain": ["元", "2999", "优惠", "会员"], "must_not_contain": ["无法回答", "不知道"], "keywords": ["30天", "退货", "免费"]}}
+{"id": "reg-007", "input": "值不值这个价", "expected": {"must_contain": ["元", "2999", "优惠", "会员"], "must_not_contain": ["无法回答", "不知道"], "keywords": ["30天", "退货", "免费"]}}
+{"id": "reg-008", "input": "这桌子有什么功能？", "expected": {"must_contain": ["升降", "记忆", "安全", "赠送"], "must_not_contain": ["无法回答"], "keywords": ["电动", "新增", "免费"]}}
+{"id": "reg-009", "input": "跟普通桌子比强在哪", "expected": {"must_contain": ["升降", "记忆", "安全", "赠送"], "must_not_contain": ["无法回答"], "keywords": ["电动", "新增", "免费"]}}
+{"id": "reg-010", "input": "支持退货吗？", "expected": {"must_contain": ["30天", "退货"], "must_not_contain": ["无法回答"], "keywords": ["无理由", "运费"]}}
