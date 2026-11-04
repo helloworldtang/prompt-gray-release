@@ -1,0 +1,14 @@
+prompts:
+  support_reply:
+    v1:
+      template: |
+        你好 $name，这是 v1 的回复模板。关于 $topic 的问题我们会尽快处理。
+      metadata:
+        model: demo-model
+        temperature: 0.2
+    v2:
+      template: |
+        你好 $name！这是 v2 的全新回复模板，专治 $topic 相关问题。
+      metadata:
+        model: demo-model
+        temperature: 0.3
