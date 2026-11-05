@@ -6,6 +6,19 @@
 > Prompt release engineering: versioning, canary rollout, eval gates,
 > one-click rollback and deterministic incident replay. Lightweight, embeddable, no platform required.
 
+## 项目目标
+
+**让任何团队——无需搭建平台——把 Prompt 变更纳入与代码同级的发布纪律。**
+
+拆成三个可验收的子目标：
+
+1. **安全上线**：Prompt 变更先过评测门禁，再按流量灰度，异常秒级回滚（对应 Registry / EvalGate / RolloutController）；
+2. **行为可验证**：Prompt 的每次行为变化都能被确定性重演并自动检出（对应 Recorder / Replayer / `prompt-gray check`）；
+3. **过程可审计**：谁、何时、把哪个版本、放了多少流量，全程 JSONL 可追溯。
+
+**目标用户**：没有 MLOps 平台、也不相搭平台的 LLM 应用团队；需要私有化与审计的强合规企业；个人开发者。
+**非目标**：不做模型路由、不做评测平台、不做 Web 控制台——只做「发布链路」这一层。
+
 ## 为什么需要它
 
 LLM 应用里，**Prompt 就是生产代码**——但它的变更方式却像在改配置：
@@ -136,6 +149,8 @@ prompt-gray-release 是**发布链路的一层**（版本化、灰度、回滚�
 用它们看效果，用 prompt-gray-release 管上线。不需要平台的小团队，它可以单独工作。
 
 ## 路线图
+
+详细计划与进度见 [TODO.md](TODO.md)。
 
 - [ ] CLI：`prompt-gray promote / rollback / diff`
 - [ ] 评测函数注册表（正则 / JSON Schema 校验 / 关键词集合）
