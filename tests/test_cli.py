@@ -138,7 +138,7 @@ prompts:
 
     def test_multiple_cassettes(self, capsys, tmp_path, cassette_file, registry_yaml):
         second = tmp_path / "traffic2.jsonl"
-        cassette_file.link_to(second)
+        second.hardlink_to(cassette_file)
         rc = main(
             [
                 "check",
