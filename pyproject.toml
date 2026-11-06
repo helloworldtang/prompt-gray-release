@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "prompt-gray-release"
-version = "0.1.0"
+version = "0.2.0"
 description = "把 Prompt 当生产代码发布：版本化、灰度放量、评测门禁、一键回滚、事故重演。Prompt release engineering: versioning, canary rollout, eval gates, rollback and incident replay."
 readme = "README.md"
 requires-python = ">=3.10"

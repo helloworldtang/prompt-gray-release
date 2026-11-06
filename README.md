@@ -230,7 +230,7 @@ python examples/openai_demo.py
 
 ```bash
 pip install -e ".[dev]"
-pytest          # 97 个测试
+pytest          # 109 个测试
 ruff check src tests examples && ruff format --check src tests examples
 mypy src        # strict
 ```
