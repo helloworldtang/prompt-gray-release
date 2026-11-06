@@ -6,6 +6,21 @@
 > Prompt release engineering: versioning, canary rollout, eval gates,
 > one-click rollback and deterministic incident replay. Lightweight, embeddable, no platform required.
 
+## 为什么是它：与平台方案的根本差异
+
+LangSmith / Langfuse 是**评测与观测平台**——它们管"效果好不好"，管不住**上线那一刻**。
+prompt-gray-release 补的就是上线那一刻，并且不要求你搭建或迁移到任何平台：
+
+| | LangSmith / Langfuse 等平台 | prompt-gray-release |
+|---|---|---|
+| 形态 | SaaS / 自托管服务，数据要出域或进它们的存储 | **纯库**，`pip install` 即用，数据不出你的进程 |
+| 私有化与审计 | 自托管版要搭整套服务 | **JSONL 审计事件内建**，append-only，合规环境直接对接 |
+| CI 门禁 | 依赖平台 CI 集成 | `prompt-gray check` 本地/CI 原生跑，**模板漂移直接挡合并** |
+| 事故重演 | 数据集快照（要再调模型） | **确定性重演**：录下当时的响应，重放零调用、零成本、结果恒定 |
+| 依赖 | 平台 SDK + 账号 + 网络 | **唯一依赖 PyYAML** |
+
+一句话：**用平台看效果，用 prompt-gray-release 管上线。** 没有平台的小团队，它单独工作。
+
 ## 项目目标
 
 **让任何团队——无需搭建平台——把 Prompt 变更纳入与代码同级的发布纪律。**
@@ -16,7 +31,7 @@
 2. **行为可验证**：Prompt 的每次行为变化都能被确定性重演并自动检出（对应 Recorder / Replayer / `prompt-gray check`）；
 3. **过程可审计**：谁、何时、把哪个版本、放了多少流量，全程 JSONL 可追溯。
 
-**目标用户**：没有 MLOps 平台、也不相搭平台的 LLM 应用团队；需要私有化与审计的强合规企业；个人开发者。
+**目标用户**：没有 MLOps 平台、也不打算搭平台的 LLM 应用团队；需要私有化与审计的强合规企业；个人开发者。
 **非目标**：不做模型路由、不做评测平台、不做 Web 控制台——只做「发布链路」这一层。
 
 ## 为什么需要它
@@ -25,18 +40,9 @@ LLM 应用里，**Prompt 就是生产代码**——但它的变更方式却像�
 
 - 改一句措辞就可能让格式崩坏、答非所问、成本飙升，而且是**全量瞬间生效**；
 - 没有 diff 审查，没有回归测试，没有发布批次，出事了只能全网搜"刚才谁改的 Prompt"；
-- 观测平台（LangSmith / Langfuse）能告诉你效果好不好，但**管不住上线那一刻**。
+- 观测平台能告诉你效果好不好，但**管不住上线那一刻**。
 
 prompt-gray-release 补的就是"上线那一刻"：**新 Prompt 先过评测门禁，再按 1% → 10% → 50% → 100% 灰度放量，出问题秒级回滚，历史事故随时确定性重演。**
-
-## 核心特性
-
-- **版本化注册表**：YAML / JSON 管理 Prompt 版本与元数据，git 友好；
-- **灰度路由**：按用户稳定分桶放量（1% → 100%），同一用户永远同一版本，重启不变；
-- **评测门禁**：候选版本先跑 golden 评测集，不达基线自动拦截（fail-closed）；
-- **一键回滚**：放弃候选、流量瞬间回到 stable，全程 JSONL 审计；
-- **录制与确定性重演**：录制线上真实调用（输入 + 模型响应），之后随时原样重放——同一批输入永远得到同一批输出，模板漂移自动检出；
-- **轻量**：唯一依赖 PyYAML；无平台、无服务、`pip install` 即用；`$var` 占位符不与 Prompt 内的 JSON 花括号冲突。
 
 ## 安装
 
@@ -44,9 +50,13 @@ prompt-gray-release 补的就是"上线那一刻"：**新 Prompt 先过评测门
 pip install prompt-gray-release
 ```
 
+Python >= 3.10。唯一运行时依赖 PyYAML。
+
 ## 快速开始
 
-完整可运行示例见 [examples/quickstart.py](examples/quickstart.py)。
+完整可运行示例见 [examples/quickstart.py](examples/quickstart.py)（零 API key，
+模拟模型 5 分钟跑通）与 [examples/openai_demo.py](examples/openai_demo.py)（真实模型全流程，
+任意 OpenAI 兼容端点）。
 
 ### 1. 定义 Prompt 版本（prompts.yaml）
 
@@ -98,7 +108,8 @@ else:
     rollout.rollback("support_reply")          # 秒级回滚
 ```
 
-评测函数可插拔：内置 `exact_match` / `contains`，也可以传自定义 `evaluator(output, expected) -> float`。
+评测函数可插拔：内置 `exact_match` / `contains`，也可以传自定义 `evaluator(output, expected) -> float`
+（包括把真实模型当裁判——见 [examples/openai_demo.py](examples/openai_demo.py)）。
 `gate.enforce(...)` 在不达标时直接抛 `EvalGateBlocked`（fail-closed），适合放进 CI。
 
 ### 4. 放量、回滚与审计
@@ -135,6 +146,59 @@ fake_model("任意文本", {"name": "张三", "topic": "发票"})  # 永远返�
 **同一批输入永远得到同一批输出**——下游解析逻辑、路由逻辑、降级逻辑的回归测试从此有了稳定靶子；
 `matches=False` 则直接告诉你"事故之后有人改过模板"。
 
+## CLI：不写 Python 也能用
+
+安装后自带 `prompt-gray` 命令。运维子命令全部走唯一写入口，动作自动审计：
+
+```bash
+prompt-gray set-stable      support_reply v1               --state rollout.json
+prompt-gray start-rollout   support_reply v2 --percent 10  --state rollout.json
+prompt-gray status          support_reply                  --state rollout.json
+prompt-gray set-percent     support_reply 50               --state rollout.json
+prompt-gray rollback        support_reply                  --state rollout.json   # 秒级回滚
+prompt-gray promote-full    support_reply                  --state rollout.json
+```
+
+## CI 重演门禁：改一行模板，CI 变红
+
+`prompt-gray check` 把"确定性重演"变成 CI 门禁——拿录制的真实流量对当前注册表逐条重演，
+模板漂移 / 版本缺失 / 渲染失败任一出现即退出码非 0：
+
+```bash
+prompt-gray check --cassette traffic.jsonl --registry prompts.yaml --strict
+```
+
+`--strict` 下空 cassette 也算失败（防止"没录制所以全过"的假绿）。GitHub Actions 用法：
+
+```yaml
+# .github/workflows/prompt-drift.yml
+on: [pull_request]
+jobs:
+  prompt-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install prompt-gray-release
+      - run: prompt-gray check --cassette traffic.jsonl --registry prompts.yaml --strict
+```
+
+效果：**PR 里改一行模板 → CI 拦截合并；还原 → CI 恢复绿色。**
+录制文件（traffic.jsonl）跟着仓库走，门禁在本地与 CI 行为完全一致，不依赖任何外部服务。
+
+## 用真实模型 5 分钟跑通
+
+```bash
+pip install openai prompt-gray-release
+export OPENAI_API_KEY=sk-...
+export OPENAI_BASE_URL=https://...   # 可选：任意 OpenAI 兼容端点
+python examples/openai_demo.py
+```
+
+示例覆盖：灰度路由选中候选 → 真实模型调用并录制 → 真实模型当裁判的评测门禁
+（不达标自动回滚）→ 零成本确定性重演。库本身不引入 openai 依赖。
+
 ## 设计原则
 
 1. **库，不是平台**：一个 `pip install` 就能嵌入现有业务，不要求你迁移到任何系统；
@@ -142,17 +206,11 @@ fake_model("任意文本", {"name": "张三", "topic": "发票"})  # 永远返�
 3. **确定性优先**：没有 user_key 不做随机灰度；重演靠录制响应而不是"再问一次模型"；
 4. **审计内建**：状态每次变更原子落盘 + JSONL 事件流，合规环境可直接对接审计。
 
-## 与 LangSmith / Langfuse 的关系
-
-不冲突，层次不同：它们是**评测与观测平台**（追踪、数据集、在线评测）；
-prompt-gray-release 是**发布链路的一层**（版本化、灰度、回滚、重演），可与其搭配——
-用它们看效果，用 prompt-gray-release 管上线。不需要平台的小团队，它可以单独工作。
-
 ## 路线图
 
 详细计划与进度见 [TODO.md](TODO.md)。
 
-- [ ] CLI：`prompt-gray promote / rollback / diff`
+- [x] CLI：`prompt-gray status / set-stable / start-rollout / set-percent / promote-full / rollback / check`
 - [ ] 评测函数注册表（正则 / JSON Schema 校验 / 关键词集合）
 - [ ] 与 OpenTelemetry 对接的调用追踪导出
 - [ ] 多环境（dev / staging / prod）状态隔离
@@ -161,7 +219,9 @@ prompt-gray-release 是**发布链路的一层**（版本化、灰度、回滚�
 
 ```bash
 pip install -e ".[dev]"
-pytest
+pytest          # 97 个测试
+ruff check src tests examples && ruff format --check src tests examples
+mypy src        # strict
 ```
 
 ## License
