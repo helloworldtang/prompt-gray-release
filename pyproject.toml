@@ -63,6 +63,9 @@ Issues = "https://github.com/helloworldtang/prompt-gray-release/issues"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+prompt_gray_release = ["py.typed"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
