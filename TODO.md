@@ -16,7 +16,6 @@
 
 ## 开工前（目录迁移后一次性）
 
-- [ ] 重建虚拟环境：`rm -rf .venv && python3 -m venv .venv && .venv/bin/pip install -e ".[dev]"`，然后 `pytest`（86 个测试应全绿）
 
 ## Phase 0 — 仓库上线（让项目「存在」）
 
@@ -35,7 +34,7 @@
 - [x] CLI 子命令 `check`：读 cassette + registry，逐条重演；模板漂移 / 渲染不一致 / 版本缺失 → 退出码非 0
 - [x] 参数：`--cassette`（可多条）`--registry` `--strict`
 - [x] 输出人话报告：每条 record 的 matches、首个失败详情、汇总统计
-- [x] GitHub Action 用法（README「CI 重演门禁」节）（action.yml 或 README 中 pip + check 的标准写法）
+- [x] GitHub Action 用法（README「CI 重演门禁」节给出标准 workflow 写法）
 - [x] 文档：最小 CI 示例——"改一行模板 → CI 红；还原 → CI 绿"
 
 **验收** ✅：本地实测改一行模板 → `prompt-gray check` exit 1；还原 → exit 0（97 测试含契约断言）。
@@ -63,8 +62,8 @@
 ### P1-2 传播面
 
 - [x] README.en（英文版，与中文版互链）
-- [x] FastAPI 集成示例（e2e 实测：稳定分桶+回滚）（10 行级：`router.render` 进请求处理）
-- [x] pytest 集成示例（确定性假模型 + 漂移检测）（`gray_router` / `cassette` fixtures）
+- [x] FastAPI 集成示例（10 行级：`router.render` 进请求处理；e2e 实测稳定分桶+回滚）
+- [x] pytest 集成示例（cassette 确定性假模型 + 漂移检测断言）
 
 ## Phase 3 — 发布与自证
 
