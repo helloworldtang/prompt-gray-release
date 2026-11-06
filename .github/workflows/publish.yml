@@ -1,5 +1,8 @@
 name: Publish to PyPI
 
+# 邮件主题带上版本号: "Publish to PyPI (v0.2.0) - v0.2.0"
+run-name: Publish to PyPI (${{ github.ref_name }})
+
 on:
   push:
     tags:
