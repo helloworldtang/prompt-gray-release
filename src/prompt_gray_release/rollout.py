@@ -48,6 +48,17 @@ class RolloutController:
         if self.state_path is not None and self.state_path.exists():
             self._load()
 
+    @classmethod
+    def for_env(cls, base: str | Path, env: str) -> RolloutController:
+        """按环境构造：dev/staging/prod 各持独立状态文件与审计流。
+
+        ``RolloutController.for_env("rollout", "prod")`` 的状态落在
+        ``rollout.prod.json``——环境间只有路径不同，但路径不同就是状态不同。
+        """
+        from .envs import state_path_for_env
+
+        return cls(state_path=state_path_for_env(base, env))
+
     # ---------- 查询 ----------
 
     def state(self, key: str) -> RolloutState:
