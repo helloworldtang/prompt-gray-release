@@ -39,6 +39,9 @@ select = ["E", "W", "F", "I", "B", "C4", "UP", "SIM"]
 strict = true
 python_version = "3.10"
 
+[project.scripts]
+prompt-gray = "prompt_gray_release.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/helloworldtang/prompt-gray-release"
 Issues = "https://github.com/helloworldtang/prompt-gray-release/issues"

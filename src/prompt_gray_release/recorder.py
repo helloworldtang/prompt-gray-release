@@ -14,7 +14,7 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
-from .exceptions import ReplayMissError
+from .exceptions import ReplayMissError, TemplateRenderError
 from .registry import PromptRegistry
 from .render import render_template
 from .router import RenderedPrompt
@@ -107,12 +107,17 @@ class Cassette:
 
 @dataclass
 class ReplayResult:
-    """单条重演结果：当时的响应（确定性），以及当前模板重新渲染的文本是否与当时一致。"""
+    """单条重演结果：当时的响应（确定性），以及当前模板重新渲染的文本是否与当时一致。
+
+    ``error`` 为 None 时重演本身成功；否则为 ``"version_missing"``（key 或版本
+    已不在注册表）或 ``"render_error"``（模板已无法用当时的变量渲染）。
+    """
 
     record: CallRecord
     rendered_now: str | None
     response: str
     matches: bool
+    error: str | None = None
 
 
 class Replayer:
@@ -150,7 +155,11 @@ class Replayer:
         return model
 
     def replay_registry(self, registry: PromptRegistry) -> list[ReplayResult]:
-        """逐条重演：当前注册表重新渲染 vs 当时录制文本。"""
+        """逐条重演：当前注册表重新渲染 vs 当时录制文本。
+
+        渲染失败（模板改到缺变量等）不会中断整轮重演，而是记为
+        ``error="render_error"`` 的失败结果——重演是门禁，不是单点。
+        """
         results: list[ReplayResult] = []
         for rec in self.cassette.records:
             if rec.prompt_key not in registry or rec.version not in registry.versions(
@@ -158,12 +167,28 @@ class Replayer:
             ):
                 results.append(
                     ReplayResult(
-                        record=rec, rendered_now=None, response=rec.response, matches=False
+                        record=rec,
+                        rendered_now=None,
+                        response=rec.response,
+                        matches=False,
+                        error="version_missing",
                     )
                 )
                 continue
             pv = registry.get(rec.prompt_key, rec.version)
-            rendered_now = render_template(pv.template, rec.variables)
+            try:
+                rendered_now = render_template(pv.template, rec.variables)
+            except TemplateRenderError:
+                results.append(
+                    ReplayResult(
+                        record=rec,
+                        rendered_now=None,
+                        response=rec.response,
+                        matches=False,
+                        error="render_error",
+                    )
+                )
+                continue
             results.append(
                 ReplayResult(
                     record=rec,
