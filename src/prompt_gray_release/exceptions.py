@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .gate import EvalReport
+
 
 class PromptGrayReleaseError(Exception):
     """prompt-gray-release 所有异常的基类。"""
@@ -26,17 +31,12 @@ class RolloutStateError(PromptGrayReleaseError):
 class EvalGateBlocked(PromptGrayReleaseError):
     """评测门禁拦截：候选版本得分未达标。"""
 
-    def __init__(self, report) -> None:
+    def __init__(self, report: EvalReport) -> None:
         self.report = report
         super().__init__(
-            "[{}] 评测门禁拦截：{}={:.3f} vs 基线 {}={:.3f}（要求 >= +{:.3f}）".format(
-                report.key,
-                report.candidate,
-                report.candidate_score,
-                report.baseline,
-                report.baseline_score,
-                report.min_improvement,
-            )
+            f"[{report.key}] 评测门禁拦截：{report.candidate}={report.candidate_score:.3f}"
+            f" vs 基线 {report.baseline}={report.baseline_score:.3f}"
+            f"（要求 >= +{report.min_improvement:.3f}）"
         )
 
 

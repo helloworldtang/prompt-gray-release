@@ -33,7 +33,12 @@ def main() -> None:
 
     print("== 2. 评测门禁（候选先跑 golden 集）==")
     gate = EvalGate(registry)
-    cases = [EvalCase({"name": "张三", "topic": "发票"}, "你好 张三，这是 v1 的回复模板。关于 发票 的问题我们会尽快处理。")]
+    cases = [
+        EvalCase(
+            {"name": "张三", "topic": "发票"},
+            "你好 张三，这是 v1 的回复模板。关于 发票 的问题我们会尽快处理。",
+        )
+    ]
     report = gate.evaluate("support_reply", candidate="v2", baseline="v1", cases=cases)
     print(" ", report.summary())
     if report.passed:

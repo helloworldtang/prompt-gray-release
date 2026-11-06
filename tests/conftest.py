@@ -7,7 +7,10 @@ from prompt_gray_release import PromptRegistry, RolloutController
 PROMPTS = {
     "support_reply": {
         "v1": {"template": "你好 $name，这是 v1 的回复模板。", "metadata": {"model": "m1"}},
-        "v2": {"template": "你好 $name，这是 v2 的回复模板，针对 $topic。", "metadata": {"model": "m2"}},
+        "v2": {
+            "template": "你好 $name，这是 v2 的回复模板，针对 $topic。",
+            "metadata": {"model": "m2"},
+        },
         "v3": {"template": "尊敬的 $name：关于 $topic 的问题，v3 已收到。"},
     },
     "summary": {

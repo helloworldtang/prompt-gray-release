@@ -23,7 +23,14 @@ def test_record_writes_jsonl(tmp_path, rendered):
     assert data["version"] == "v1"
     assert data["rendered_text"] == "摘要（v1）：hi"
     assert data["response"] == "resp-1"
-    assert set(data.keys()) == {"prompt_key", "version", "variables", "rendered_text", "response", "ts"}
+    assert set(data.keys()) == {
+        "prompt_key",
+        "version",
+        "variables",
+        "rendered_text",
+        "response",
+        "ts",
+    }
 
 
 def test_record_appends_multiple_lines(tmp_path, rendered):

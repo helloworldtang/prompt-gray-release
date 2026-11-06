@@ -2,7 +2,13 @@ from __future__ import annotations
 
 import pytest
 
-from prompt_gray_release import EvalCase, EvalGate, EvalGateBlocked, VersionNotFoundError, exact_match
+from prompt_gray_release import (
+    EvalCase,
+    EvalGate,
+    EvalGateBlocked,
+    VersionNotFoundError,
+    exact_match,
+)
 
 
 def make_cases():
@@ -67,7 +73,9 @@ def test_empty_cases_raise(registry):
 
 
 def test_custom_evaluator(registry):
-    report = EvalGate(registry).evaluate("summary", "v2", "v1", make_cases(), evaluator=lambda o, e: 0.5)
+    report = EvalGate(registry).evaluate(
+        "summary", "v2", "v1", make_cases(), evaluator=lambda o, e: 0.5
+    )
     assert report.candidate_score == 0.5
     assert report.passed is True
 

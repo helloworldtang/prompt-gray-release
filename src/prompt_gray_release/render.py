@@ -6,12 +6,11 @@
 from __future__ import annotations
 
 from string import Template
-from typing import Dict, Optional
 
 from .exceptions import TemplateRenderError
 
 
-def render_template(template: str, variables: Optional[Dict[str, str]] = None) -> str:
+def render_template(template: str, variables: dict[str, str] | None = None) -> str:
     """渲染 Prompt 模板。
 
     - ``$name`` / ``${name}`` 会被替换为 variables 中的值；

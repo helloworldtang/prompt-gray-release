@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
-from typing import Dict, Optional, Tuple
 
 from .registry import PromptRegistry
 from .render import render_template
@@ -13,7 +12,7 @@ from .rollout import RolloutController
 
 def bucket(key: str, user_key: str) -> int:
     """稳定分桶：同一 (prompt, user) 永远落在同一桶，跨进程/重启不变。"""
-    digest = hashlib.sha256(f"{key}#{user_key}".encode("utf-8")).hexdigest()
+    digest = hashlib.sha256(f"{key}#{user_key}".encode()).hexdigest()
     return int(digest[:8], 16) % 100
 
 
@@ -24,7 +23,7 @@ class RenderedPrompt:
     prompt_key: str
     version: str
     text: str
-    metadata: dict
+    metadata: dict[str, object]
     percent: int
 
 
@@ -43,7 +42,7 @@ class GrayRouter:
         self.registry = registry
         self.rollout = rollout
 
-    def route(self, key: str, user_key: Optional[str] = None) -> Tuple[str, int]:
+    def route(self, key: str, user_key: str | None = None) -> tuple[str, int]:
         """返回 (选中的版本, 当前灰度百分比)。"""
         st = self.rollout.state(key)
         if st.candidate and st.percent >= 100:
@@ -57,7 +56,9 @@ class GrayRouter:
             return st.candidate, st.percent
         return st.stable, st.percent
 
-    def render(self, key: str, variables: Optional[Dict[str, str]] = None, user_key: Optional[str] = None) -> RenderedPrompt:
+    def render(
+        self, key: str, variables: dict[str, str] | None = None, user_key: str | None = None
+    ) -> RenderedPrompt:
         """路由并渲染。缺少变量时抛 TemplateRenderError（fail-fast）。"""
         version, percent = self.route(key, user_key=user_key)
         pv = self.registry.get(key, version)

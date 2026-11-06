@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import cast
 
 from .exceptions import PromptNotFoundError, VersionNotFoundError
 
@@ -17,7 +17,7 @@ class PromptVersion:
     key: str
     version: str
     template: str
-    metadata: Dict[str, object] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
 
 
 class PromptRegistry:
@@ -34,8 +34,8 @@ class PromptRegistry:
                 model: gpt-4o-mini
     """
 
-    def __init__(self, prompts: Optional[dict] = None) -> None:
-        self._prompts: Dict[str, Dict[str, PromptVersion]] = {}
+    def __init__(self, prompts: dict[str, dict[str, dict[str, object]]] | None = None) -> None:
+        self._prompts: dict[str, dict[str, PromptVersion]] = {}
         for key, versions in (prompts or {}).items():
             self._prompts[key] = {}
             for version, spec in (versions or {}).items():
@@ -44,19 +44,19 @@ class PromptRegistry:
                 self._prompts[key][version] = PromptVersion(
                     key=key,
                     version=version,
-                    template=spec["template"],
-                    metadata=dict(spec.get("metadata") or {}),
+                    template=cast("str", spec["template"]),
+                    metadata=cast("dict[str, object]", spec.get("metadata") or {}),
                 )
 
     @classmethod
-    def from_yaml(cls, path) -> "PromptRegistry":
+    def from_yaml(cls, path: str | Path) -> PromptRegistry:
         import yaml  # 延迟导入：PyYAML 是本库唯一依赖
 
         data = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
         return cls(data.get("prompts", data))
 
     @classmethod
-    def from_json(cls, path) -> "PromptRegistry":
+    def from_json(cls, path: str | Path) -> PromptRegistry:
         data = json.loads(Path(path).read_text(encoding="utf-8"))
         return cls(data.get("prompts", data))
 
@@ -65,10 +65,12 @@ class PromptRegistry:
         if key not in self._prompts:
             raise PromptNotFoundError(f"prompt 不存在: {key}")
         if version not in self._prompts[key]:
-            raise VersionNotFoundError(f"prompt {key} 版本不存在: {version}（可用: {self.versions(key)}）")
+            raise VersionNotFoundError(
+                f"prompt {key} 版本不存在: {version}（可用: {self.versions(key)}）"
+            )
         return self._prompts[key][version]
 
-    def versions(self, key: str) -> List[str]:
+    def versions(self, key: str) -> list[str]:
         """返回某 key 的全部版本（按定义顺序）。"""
         if key not in self._prompts:
             raise PromptNotFoundError(f"prompt 不存在: {key}")
@@ -78,7 +80,7 @@ class PromptRegistry:
         """返回某 key 最新（定义顺序最后一个）的版本。"""
         return self.get(key, self.versions(key)[-1])
 
-    def keys(self) -> List[str]:
+    def keys(self) -> list[str]:
         return list(self._prompts.keys())
 
     def __contains__(self, key: str) -> bool:

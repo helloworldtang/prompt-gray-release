@@ -129,7 +129,12 @@ def test_audit_log_records_actions(tmp_path):
     rc.start_rollout("k", "v2", 10)
     rc.set_percent("k", 30)
     rc.promote_full("k")
-    events = [json.loads(line) for line in (tmp_path / "rollout.json.events.jsonl").read_text(encoding="utf-8").splitlines()]
+    events = [
+        json.loads(line)
+        for line in (tmp_path / "rollout.json.events.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+    ]
     actions = [e["action"] for e in events]
     assert actions == ["set_stable", "start_rollout", "set_percent", "promote_full"]
     assert events[-1]["stable"] == "v2"

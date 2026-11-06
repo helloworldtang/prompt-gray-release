@@ -23,7 +23,7 @@
 **目标：代码公开、CI 跑绿，项目有了可以被点开、被引用、被验证的实体。**
 
 - [ ] 推送到 GitHub：`git remote add origin git@github.com:helloworldtang/prompt-gray-release.git && git push -u origin main`
-- [ ] 确认 GitHub Actions 上 CI 跑绿（Python 3.9–3.12 矩阵）
+- [ ] 确认 GitHub Actions 上 CI 跑绿（Python 3.10–3.13 矩阵；3.9 已于 2025-10 EOL，基线提至 3.10）
 - [ ] 仓库 About / Topics：`prompt-engineering` `llm` `canary-release` `prompt-versioning` `llmops`
 
 ## Phase 1 — P0：核心价值闭环（优先做这两个）

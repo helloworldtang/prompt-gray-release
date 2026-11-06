@@ -7,7 +7,6 @@ import os
 import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Dict, Optional
 
 from .exceptions import RolloutStateError
 
@@ -22,7 +21,7 @@ class RolloutState:
     """
 
     stable: str
-    candidate: Optional[str] = None
+    candidate: str | None = None
     percent: int = 0
 
 
@@ -30,14 +29,20 @@ class RolloutController:
     """管理所有 prompt 的灰度状态。
 
     传入 ``state_path`` 后，每次状态变更都会原子落盘，并追加 JSONL 审计事件
-    （默认写到 ``<state_path>.events.jsonl``），满足"谁在什么时候把哪个版本放了多少流量"的可追溯要求。
+    （默认写到 ``<state_path>.events.jsonl``），满足"谁在什么时候把哪个版本
+    放了多少流量"的可追溯要求。
     """
 
-    def __init__(self, state_path=None, audit_path=None) -> None:
-        self._states: Dict[str, RolloutState] = {}
-        self.state_path = Path(state_path) if state_path else None
+    def __init__(
+        self, state_path: str | Path | None = None, audit_path: str | Path | None = None
+    ) -> None:
+        self._states: dict[str, RolloutState] = {}
+        self.state_path: Path | None = Path(state_path) if state_path else None
+        self.audit_path: Path | None = None
         if self.state_path is not None:
-            self.audit_path = Path(audit_path) if audit_path else Path(str(self.state_path) + ".events.jsonl")
+            self.audit_path = (
+                Path(audit_path) if audit_path else Path(str(self.state_path) + ".events.jsonl")
+            )
         else:
             self.audit_path = None
         if self.state_path is not None and self.state_path.exists():
@@ -134,6 +139,7 @@ class RolloutController:
         os.replace(tmp, self.state_path)
 
     def _load(self) -> None:
+        assert self.state_path is not None  # 仅在 state_path 存在时被调用
         data = json.loads(self.state_path.read_text(encoding="utf-8"))
         for key, st in data.items():
             self._states[key] = RolloutState(

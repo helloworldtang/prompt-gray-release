@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable, Dict, List, Optional
 
 from .exceptions import EvalGateBlocked
 from .registry import PromptRegistry
@@ -24,13 +24,13 @@ def contains(output: str, expected: str) -> float:
 class EvalCase:
     """一条评测样例：渲染变量 + 期望内容。"""
 
-    variables: Dict[str, str]
+    variables: dict[str, str]
     expected: str
 
 
 @dataclass
 class CaseResult:
-    variables: Dict[str, str]
+    variables: dict[str, str]
     output: str
     baseline_output: str
     score: float
@@ -48,18 +48,14 @@ class EvalReport:
     baseline_score: float
     min_improvement: float
     passed: bool
-    cases: List[CaseResult] = field(default_factory=list)
+    cases: list[CaseResult] = field(default_factory=list)
 
     def summary(self) -> str:
         verdict = "通过" if self.passed else "拦截"
-        return "[{}] {}={:.3f} vs 基线 {}={:.3f}（要求 >= +{:.3f}）→ {}".format(
-            self.key,
-            self.candidate,
-            self.candidate_score,
-            self.baseline,
-            self.baseline_score,
-            self.min_improvement,
-            verdict,
+        return (
+            f"[{self.key}] {self.candidate}={self.candidate_score:.3f}"
+            f" vs 基线 {self.baseline}={self.baseline_score:.3f}"
+            f"（要求 >= +{self.min_improvement:.3f}）→ {verdict}"
         )
 
 
@@ -74,8 +70,8 @@ class EvalGate:
         key: str,
         candidate: str,
         baseline: str,
-        cases: List[EvalCase],
-        evaluator: Optional[Callable[[str, str], float]] = None,
+        cases: list[EvalCase],
+        evaluator: Callable[[str, str], float] | None = None,
         min_improvement: float = 0.0,
     ) -> EvalReport:
         """跑评测。``evaluator(output, expected) -> float``，默认完全匹配。
@@ -86,9 +82,9 @@ class EvalGate:
             raise ValueError("评测集不能为空")
         evaluator = evaluator or exact_match
 
-        results: List[CaseResult] = []
-        candidate_scores: List[float] = []
-        baseline_scores: List[float] = []
+        results: list[CaseResult] = []
+        candidate_scores: list[float] = []
+        baseline_scores: list[float] = []
         for case in cases:
             candidate_pv = self.registry.get(key, candidate)
             baseline_pv = self.registry.get(key, baseline)
@@ -127,8 +123,8 @@ class EvalGate:
         key: str,
         candidate: str,
         baseline: str,
-        cases: List[EvalCase],
-        evaluator: Optional[Callable[[str, str], float]] = None,
+        cases: list[EvalCase],
+        evaluator: Callable[[str, str], float] | None = None,
         min_improvement: float = 0.0,
     ) -> EvalReport:
         """评测并在不达标时直接抛出 :class:`EvalGateBlocked`（fail-closed）。"""
