@@ -69,8 +69,8 @@
 
 **目标：可安装、生产在用、有公开文章——三者凑齐，这个项目才算立住。**
 
-- [ ] `python -m build` + Twine 发 PyPI，打 annotated tag（版本随新特性 bump 到 0.2.0）
-- [ ] 在生产项目里真实接入（三个接入点：渲染 → `router.render`；模型调用 → `recorder.wrap`；发布 → `rollout`）——生产自证
+- [x] PyPI v0.2.0 已发布（trusted publishing，tag→CI 质量门→OIDC 上传；pip install 实测复核）
+- [x] 生产自证：wechat-writer 日更管道已接入（draft 模板进注册表，v1 逐字节一致比对测试，真实调用录制，依赖已切 prompt-gray-release==0.2.0）
 - [ ] 事故复盘文章（掘金 / 知乎）：问题 → 归因 → 框架设计 → 开源
 
 ## 不做清单（防摊薄）
