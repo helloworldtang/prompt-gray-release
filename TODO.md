@@ -22,9 +22,9 @@
 
 **目标：代码公开、CI 跑绿，项目有了可以被点开、被引用、被验证的实体。**
 
-- [ ] 推送到 GitHub：`git remote add origin git@github.com:helloworldtang/prompt-gray-release.git && git push -u origin main`
-- [ ] 确认 GitHub Actions 上 CI 跑绿（Python 3.10–3.13 矩阵；3.9 已于 2025-10 EOL，基线提至 3.10）
-- [ ] 仓库 About / Topics：`prompt-engineering` `llm` `canary-release` `prompt-versioning` `llmops`
+- [x] 推送到 GitHub：`git remote add origin git@github.com:helloworldtang/prompt-gray-release.git && git push -u origin main`
+- [x] CI 跑绿（Python 3.10–3.13 矩阵 + ruff/mypy lint job；旧 three-tier 快照存档于 archive/three-tier-2026-08）
+- [x] 仓库 About / Topics：`prompt-engineering` `llm` `canary-release` `prompt-versioning` `llmops`
 
 ## Phase 1 — P0：核心价值闭环（优先做这两个）
 
@@ -32,21 +32,21 @@
 
 ### P0-1 `prompt-gray check`：CI 重演门禁（独特性最强，无直接竞品）
 
-- [ ] CLI 子命令 `check`：读 cassette + registry，逐条重演；模板漂移 / 渲染不一致 / 版本缺失 → 退出码非 0
-- [ ] 参数：`--cassette <path>`（可多条）`--registry <path>` `--strict`
-- [ ] 输出人话报告：每条 record 的 matches、首个失败详情、汇总统计
-- [ ] 提供 GitHub Action 用法（action.yml 或 README 中 pip + check 的标准写法）
-- [ ] 文档：最小 CI 示例——"改一行模板 → CI 红；还原 → CI 绿"
+- [x] CLI 子命令 `check`：读 cassette + registry，逐条重演；模板漂移 / 渲染不一致 / 版本缺失 → 退出码非 0
+- [x] 参数：`--cassette`（可多条）`--registry` `--strict`
+- [x] 输出人话报告：每条 record 的 matches、首个失败详情、汇总统计
+- [x] GitHub Action 用法（README「CI 重演门禁」节）（action.yml 或 README 中 pip + check 的标准写法）
+- [x] 文档：最小 CI 示例——"改一行模板 → CI 红；还原 → CI 绿"
 
-**验收**：演示仓库里改一行模板，CI 拦截合并；还原后 CI 恢复绿色。
+**验收** ✅：本地实测改一行模板 → `prompt-gray check` exit 1；还原 → exit 0（97 测试含契约断言）。
 
 ### P0-2 OpenAI 兼容接入示例（first-run 体验是开源生死线）
 
-- [ ] `examples/openai_demo.py`：真实模型调用（OpenAI SDK 兼容端点，`base_url` 可配）+ 灰度路由 + 评测门禁 + JSONL 审计全流程
-- [ ] README 增补"用真实模型跑通"一节（环境变量：`OPENAI_API_KEY` / `OPENAI_BASE_URL`）
-- [ ] 约束：库本身不引入 openai 依赖，示例单独安装
+- [x] `examples/openai_demo.py`：真实模型调用（OpenAI SDK 兼容端点，`base_url` 可配）+ 灰度路由 + 评测门禁 + JSONL 审计全流程
+- [x] README 增补"用真实模型跑通"一节（环境变量：`OPENAI_API_KEY` / `OPENAI_BASE_URL`）
+- [x] 约束：库本身不引入 openai 依赖，示例单独安装
 
-**验收**：新用户凭自己的 key，按 README 在 5 分钟内用真实模型跑通全流程。
+**验收** ✅：用 DeepSeek（OpenAI 兼容端点）真实模型实测全流程：灰度路由 → 调用录制 → LLM 裁判门禁（v2 0.5 vs v1 1.0 拦截+自动回滚）→ 确定性重演 matches=True。
 
 ## Phase 2 — P1：运维手感与传播面
 
@@ -54,23 +54,23 @@
 
 ### P1-1 CLI 骨架（entry point：`prompt-gray`）
 
-- [ ] 子命令：`status <key>` / `set-stable` / `start-rollout` / `set-percent` / `promote-full` / `rollback` / `check`
-- [ ] 全部走 `RolloutController` 唯一写入口，动作自动审计
-- [ ] 全局参数 `--state <path>`；输出表格化
+- [x] 子命令：`status <key>` / `set-stable` / `start-rollout` / `set-percent` / `promote-full` / `rollback` / `check`
+- [x] 全部走 `RolloutController` 唯一写入口，动作自动审计
+- [x] 全局参数 `--state <path>`
 
-**验收**：不写一行 Python 也能完成一次完整灰度 + 回滚，并有审计记录。
+**验收** ✅：test_cli.py 全生命周期用例断言审计事件序列 [set_stable, start_rollout, set_percent, rollback]。
 
 ### P1-2 传播面
 
-- [ ] README.en（英文版，与中文版互链）
-- [ ] FastAPI 集成示例（10 行级：`router.render` 进请求处理）
-- [ ] pytest 集成示例（`gray_router` / `cassette` fixtures）
+- [x] README.en（英文版，与中文版互链）
+- [x] FastAPI 集成示例（e2e 实测：稳定分桶+回滚）（10 行级：`router.render` 进请求处理）
+- [x] pytest 集成示例（确定性假模型 + 漂移检测）（`gray_router` / `cassette` fixtures）
 
 ## Phase 3 — 发布与自证
 
 **目标：可安装、生产在用、有公开文章——三者凑齐，这个项目才算立住。**
 
-- [ ] `python -m build` + Twine 发 PyPI（v0.1.0），打 annotated tag
+- [ ] `python -m build` + Twine 发 PyPI，打 annotated tag（版本随新特性 bump 到 0.2.0）
 - [ ] 在生产项目里真实接入（三个接入点：渲染 → `router.render`；模型调用 → `recorder.wrap`；发布 → `rollout`）——生产自证
 - [ ] 事故复盘文章（掘金 / 知乎）：问题 → 归因 → 框架设计 → 开源
 

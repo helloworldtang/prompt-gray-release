@@ -5,6 +5,8 @@
 
 > Prompt release engineering: versioning, canary rollout, eval gates,
 > one-click rollback and deterministic incident replay. Lightweight, embeddable, no platform required.
+>
+> [English README](README.en.md)
 
 ## 为什么是它：与平台方案的根本差异
 
@@ -199,6 +201,15 @@ python examples/openai_demo.py
 示例覆盖：灰度路由选中候选 → 真实模型调用并录制 → 真实模型当裁判的评测门禁
 （不达标自动回滚）→ 零成本确定性重演。库本身不引入 openai 依赖。
 
+## 集成
+
+- FastAPI：[examples/fastapi_app.py](examples/fastapi_app.py)——`router.render` 进请求处理，
+  附带回滚端点；
+- pytest：[examples/test_with_cassette.py](examples/test_with_cassette.py)——用 cassette
+  的确定性假模型做下游逻辑回归；
+- OpenTelemetry（可选 `[otel]` extra）：`traced(router)` / `traced_model(model)` 导出 span；
+- 多环境：`RolloutController.for_env("rollout", "prod")` → `rollout.prod.json`，环境间状态天然隔离。
+
 ## 设计原则
 
 1. **库，不是平台**：一个 `pip install` 就能嵌入现有业务，不要求你迁移到任何系统；
@@ -211,9 +222,9 @@ python examples/openai_demo.py
 详细计划与进度见 [TODO.md](TODO.md)。
 
 - [x] CLI：`prompt-gray status / set-stable / start-rollout / set-percent / promote-full / rollback / check`
-- [ ] 评测函数注册表（正则 / JSON Schema 校验 / 关键词集合）
-- [ ] 与 OpenTelemetry 对接的调用追踪导出
-- [ ] 多环境（dev / staging / prod）状态隔离
+- [x] 评测函数注册表（正则 / 关键词集合 / JSON 合法性 / JSON Schema）
+- [x] 与 OpenTelemetry 对接的调用追踪导出（`traced` / `traced_model`，可选 extra）
+- [x] 多环境（dev / staging / prod）状态隔离（`for_env`）
 
 ## 开发
 
