@@ -43,4 +43,5 @@ def test_registry_matches_cassette():
     registry = PromptRegistry.from_yaml(HERE / "prompts.yaml")
     results = Replayer(_cassette()).replay_registry(registry)
     mismatched = [r for r in results if not r.matches]
-    assert not mismatched, f"模板漂移: {[(r.record.prompt_key, r.record.version) for r in mismatched]}"
+    drifted = [(r.record.prompt_key, r.record.version) for r in mismatched]
+    assert not drifted, f"模板漂移: {drifted}"

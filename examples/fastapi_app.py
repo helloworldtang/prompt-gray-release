@@ -1,9 +1,9 @@
 """FastAPI 集成示例：把灰度路由嵌进请求处理（10 行级核心，可选安装 fastapi）。
 
-    pip install fastapi uvicorn prompt-gray-release
-    uvicorn examples.fastapi_app:app
+pip install fastapi uvicorn prompt-gray-release
+uvicorn examples.fastapi_app:app
 
-    curl "http://127.0.0.1:8000/reply?name=%E5%BC%A0%E4%B8%89&topic=%E5%8F%91%E7%A5%A8"
+curl "http://127.0.0.1:8000/reply?name=%E5%BC%A0%E4%B8%89&topic=%E5%8F%91%E7%A5%A8"
 """
 
 from __future__ import annotations
