@@ -127,6 +127,11 @@ rollout.rollback("support_reply")          # 秒级回到 stable
 传入 `state_path` 时，每次变更都会**原子落盘**并追加 **JSONL 审计事件**
 （谁在什么时候把哪个版本放到了多少流量），满足企业合规的可追溯要求。
 
+**热重载**：每次访问状态前先检查文件签名 `(mtime_ns, size, ino)`——state 文件被外部修改
+（CLI / 另一进程 / ConfigMap 挂载）后，运行中的实例在下一次请求自动生效，无需重启、
+无需重新部署，回滚传播延迟即下一次请求。文件被删沿用内存状态；文件损坏则抛错
+（fail-closed：宁可请求失败，不可带着错误状态继续路由）。
+
 ### 5. 录制与确定性重演
 
 ```python
@@ -205,6 +210,8 @@ python examples/openai_demo.py
 
 - FastAPI：[examples/fastapi_app.py](examples/fastapi_app.py)——`router.render` 进请求处理，
   附带回滚端点；
+- Kubernetes：state 文件挂 ConfigMap——对挂载文件执行 `prompt-gray rollback`，
+  每个 pod 在下一次请求即生效，`kubectl rollout restart` 都不需要；
 - pytest：[examples/test_with_cassette.py](examples/test_with_cassette.py)——用 cassette
   的确定性假模型做下游逻辑回归；
 - OpenTelemetry（可选 `[otel]` extra）：`traced(router)` / `traced_model(model)` 导出 span；
@@ -225,6 +232,8 @@ python examples/openai_demo.py
 - [x] 评测函数注册表（正则 / 关键词集合 / JSON 合法性 / JSON Schema）
 - [x] 与 OpenTelemetry 对接的调用追踪导出（`traced` / `traced_model`，可选 extra）
 - [x] 多环境（dev / staging / prod）状态隔离（`for_env`）
+- [x] Rollout 状态热重载：state 文件被外部修改（CLI / 另一进程 / ConfigMap）后，
+  运行中实例在下一次请求自动生效——回滚无需重启
 
 ## 开发
 

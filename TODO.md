@@ -73,6 +73,21 @@
 - [x] 生产自证：wechat-writer 日更管道已接入（draft 模板进注册表，v1 逐字节一致比对测试，真实调用录制，依赖已切 prompt-gray-release==0.2.0）
 - [ ] 事故复盘文章（掘金 / 知乎）：问题 → 归因 → 框架设计 → 开源
 
+## Phase 4 — v0.3.0：诚信修复与企业级接入
+
+**目标：README 宣称的「秒级回滚」在多进程/多实例场景成立——state 文件被外部修改后，
+运行中的实例在下一次请求自动生效，无需重启。**
+
+- [x] Rollout 状态热重载（check-on-read）：`state()`/`has()`/全部写方法先比对文件签名
+      `(mtime_ns, size, ino)`，变化才重读；写前重读防覆盖外部变更；`threading.Lock`
+      保证重载与落盘互斥；文件被删沿用内存状态、文件损坏抛 `RolloutStateError`（fail-closed）
+- [x] CLI 零改动（写完即退，热重载由常驻业务进程完成）
+- [x] 文档：README/README.en「放量、回滚与审计」+「集成」（K8s ConfigMap 用法）
+
+**验收** ✅：116 测试全绿（含 7 条热重载用例：外部回滚可见/签名未变不重读/坏文件
+fail-closed/删文件容忍/写前重载防覆盖/新 key 可见/router 端到端）；双进程实测——
+进程 A 循环 render，进程 B 执行 `prompt-gray rollback`，A 在下一次请求（<0.4s）切回 stable。
+
 ## 不做清单（防摊薄）
 
 - ~~Web 控制台~~、~~统计显著性检验~~、~~多模型竞价路由（LiteLLM 领域）~~、~~Prompt 分享 Hub~~、~~托管服务版~~

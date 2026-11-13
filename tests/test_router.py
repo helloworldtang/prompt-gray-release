@@ -87,3 +87,20 @@ def test_prompts_have_independent_states(registry, rollout, router):
 def test_render_missing_variable_raises(registry, rollout, router):
     with pytest.raises(TemplateRenderError):
         router.render("summary")
+
+
+def test_external_rollback_visible_to_running_router(registry, tmp_path):
+    """CLI（另一进程）回滚后，运行中的 router 在下一次请求即回到 stable。"""
+    from prompt_gray_release import GrayRouter, RolloutController
+
+    p = tmp_path / "rollout.json"
+    app_rollout = RolloutController(state_path=p)
+    app_rollout.set_stable("support_reply", "v1")
+    router = GrayRouter(registry, app_rollout)
+    app_rollout.start_rollout("support_reply", "v2", 100)
+    assert router.route("support_reply", "user-42") == ("v2", 100)
+
+    cli = RolloutController(state_path=p)  # 模拟 CLI 进程
+    cli.rollback("support_reply")
+
+    assert router.route("support_reply", "user-42") == ("v1", 0)

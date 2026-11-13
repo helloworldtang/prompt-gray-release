@@ -121,6 +121,13 @@ With `state_path`, every change is **atomically persisted** and appended to a
 **JSONL audit event stream**. Environments are isolated by file:
 `RolloutController.for_env("rollout", "prod")` → `rollout.prod.json`.
 
+**Hot reload**: every state access first checks the file's signature
+`(mtime_ns, size, ino)`. If the state file was modified externally — by the CLI,
+another process, or a ConfigMap mount — running instances pick it up on their
+next request. No restart, no redeploy: rollback propagation latency is one
+request. A deleted file keeps the in-memory state; a corrupted one raises
+(fail-closed).
+
 ### 5. Recording & deterministic replay
 
 ```python
@@ -198,6 +205,9 @@ deterministic replay. The library itself never depends on `openai`.
 
 - FastAPI: [examples/fastapi_app.py](examples/fastapi_app.py) — `router.render`
   inside a request handler, plus a `/__rollback` endpoint.
+- Kubernetes: mount the state file from a ConfigMap — `prompt-gray rollback`
+  against the mounted file reaches every pod on its next request, no
+  `kubectl rollout restart` needed.
 - pytest: [examples/test_with_cassette.py](examples/test_with_cassette.py) —
   deterministic fake models from cassettes for downstream-logic regression tests.
 - OpenTelemetry (optional `[otel]` extra): wrap with `traced(router)` /
