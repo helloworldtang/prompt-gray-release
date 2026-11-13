@@ -209,7 +209,21 @@ python examples/openai_demo.py
 ## 集成
 
 - FastAPI：[examples/fastapi_app.py](examples/fastapi_app.py)——`router.render` 进请求处理，
-  附带回滚端点；
+  附带回滚端点；或用依赖注入一行接入（可选 `[fastapi]` extra）：
+
+  ```python
+  from fastapi import Depends
+  from prompt_gray_release import RenderedPrompt, prompt_dep
+
+  reply_dep = prompt_dep("support_reply", router)
+
+  @app.post("/reply")
+  def reply(r: RenderedPrompt = Depends(reply_dep)):
+      ...  # r.version / r.text 直接可用
+  ```
+
+  请求体 `{"user_key": ..., "variables": {...}}`；错误分层：形状不对 422、
+  缺模板变量 400、未设置 stable 500；
 - Kubernetes：state 文件挂 ConfigMap——对挂载文件执行 `prompt-gray rollback`，
   每个 pod 在下一次请求即生效，`kubectl rollout restart` 都不需要；
 - pytest：[examples/test_with_cassette.py](examples/test_with_cassette.py)——用 cassette
@@ -234,6 +248,7 @@ python examples/openai_demo.py
 - [x] 多环境（dev / staging / prod）状态隔离（`for_env`）
 - [x] Rollout 状态热重载：state 文件被外部修改（CLI / 另一进程 / ConfigMap）后，
   运行中实例在下一次请求自动生效——回滚无需重启
+- [x] FastAPI 依赖注入（`prompt_dep`，可选 `[fastapi]` extra）：每端点一行接入灰度路由
 
 ## 开发
 

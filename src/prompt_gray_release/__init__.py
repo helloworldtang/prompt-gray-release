@@ -22,10 +22,23 @@ from .rollout import RolloutController, RolloutState
 from .router import GrayRouter, RenderedPrompt
 from .tracing import traced, traced_model
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
+
+
+def __getattr__(name: str) -> object:
+    # prompt_dep 懒加载：不在包导入时拉起 fastapi_dep 的类型链
+    # （fastapi 本身到调用 prompt_dep 才要求安装）。
+    if name == "prompt_dep":
+        from .fastapi_dep import prompt_dep
+
+        return prompt_dep
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 __all__ = [
     "__version__",
+    # fastapi 依赖注入（懒加载，可选 extra [fastapi]）
+    "prompt_dep",
     # registry
     "PromptRegistry",
     "PromptVersion",

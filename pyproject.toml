@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "prompt-gray-release"
-version = "0.3.0"
+version = "0.4.0"
 description = "把 Prompt 当生产代码发布：版本化、灰度放量、评测门禁、一键回滚、事故重演。Prompt release engineering: versioning, canary rollout, eval gates, rollback and incident replay."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -26,12 +26,15 @@ dependencies = ["PyYAML>=6.0"]
 [project.optional-dependencies]
 schema = ["jsonschema>=4.0"]
 otel = ["opentelemetry-api>=1.20"]
+fastapi = ["fastapi>=0.100"]
 dev = [
   "pytest>=7.0",
   "ruff>=0.6",
   "mypy>=1.10",
   "types-PyYAML",
   "jsonschema>=4.0",
+  "fastapi>=0.100",
+  "httpx>=0.24",
   "build",
   "twine",
 ]
@@ -43,6 +46,10 @@ src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "B", "C4", "UP", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/test_fastapi_dep.py" = ["B008"] # FastAPI 的 Depends-in-default 惯用法
+"examples/fastapi_app.py" = ["B008"]
 
 [tool.mypy]
 strict = true

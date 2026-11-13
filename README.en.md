@@ -204,7 +204,22 @@ deterministic replay. The library itself never depends on `openai`.
 ## Integrations
 
 - FastAPI: [examples/fastapi_app.py](examples/fastapi_app.py) — `router.render`
-  inside a request handler, plus a `/__rollback` endpoint.
+  inside a request handler, plus a `/__rollback` endpoint. Or one line per
+  endpoint via dependency injection (optional `[fastapi]` extra):
+
+  ```python
+  from fastapi import Depends
+  from prompt_gray_release import RenderedPrompt, prompt_dep
+
+  reply_dep = prompt_dep("support_reply", router)
+
+  @app.post("/reply")
+  def reply(r: RenderedPrompt = Depends(reply_dep)):
+      ...  # r.version / r.text ready to use
+  ```
+
+  Request body: `{"user_key": ..., "variables": {...}}`. Error mapping:
+  malformed body 422, missing template variable 400, unset stable 500.
 - Kubernetes: mount the state file from a ConfigMap — `prompt-gray rollback`
   against the mounted file reaches every pod on its next request, no
   `kubectl rollout restart` needed.

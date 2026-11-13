@@ -88,6 +88,20 @@
 fail-closed/删文件容忍/写前重载防覆盖/新 key 可见/router 端到端）；双进程实测——
 进程 A 循环 render，进程 B 执行 `prompt-gray rollback`，A 在下一次请求（<0.4s）切回 stable。
 
+## Phase 5 — v0.4.0：FastAPI 依赖注入（接入 5 行压 1 行）
+
+**目标：FastAPI 用户每个端点一行接入灰度路由，请求体即渲染入参。**
+
+- [x] `prompt_dep(key, router)`：请求体 `{"user_key", "variables"}` → `RenderedPrompt`；
+      PEP 562 懒导出（包导入不拉起 fastapi，未装时调用才报错并提示 `[fastapi]` extra）
+- [x] 错误分层：形状不对 422 / 缺模板变量 400 / 未设置 stable 500（不捕获）
+- [x] 坑：future annotations + 局部导入的 `Request` 注解在模块全局解析不到，
+      FastAPI 会把它当 query 参数——`dep.__annotations__` 显式写入真实类对象
+- [x] 示例 `fastapi_app.py` 增 `/reply-dep`；README/README.en「集成」节补用法
+
+**验收** ✅：122 测试全绿（含 6 条 HTTP 契约用例）；懒加载契约实证——
+`import prompt_gray_release` 后 `sys.modules` 无 fastapi，`pgr.prompt_dep` 按需可用。
+
 ## 不做清单（防摊薄）
 
 - ~~Web 控制台~~、~~统计显著性检验~~、~~多模型竞价路由（LiteLLM 领域）~~、~~Prompt 分享 Hub~~、~~托管服务版~~
